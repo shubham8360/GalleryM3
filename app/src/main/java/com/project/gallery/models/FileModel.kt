@@ -1,6 +1,7 @@
 package com.project.gallery.models
 
-class FileModel(
+
+data class FileModel(
     val fileId: Long,
     val path: String,
     val name: String?,
@@ -11,6 +12,4 @@ class FileModel(
     val bucketPath: String?,
     val bucketName: String?,
     val isSelected: Boolean
-) {
-
-}
+)

@@ -24,14 +24,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.project.gallery.R
 import com.project.gallery.utils.Constants
 import com.project.gallery.utils.PermissionManager
+import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController = rememberNavController(), viewModel: MainViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember {
@@ -75,9 +78,11 @@ fun MainScreen() {
             }, snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState)
             }
-        ) {
+        ) { padding ->
             if (permission) {
-                ImageScreen(modifier = Modifier.padding(it))
+                ImageScreen(modifier = Modifier.padding(padding),viewModel) { id ->
+                    navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
+                }
             }
         }
 
