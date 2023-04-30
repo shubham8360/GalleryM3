@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Gallery M3</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="cd_gallery_photo">Gallery Photo</string>
+    <string name="back_button_cd">Back Button</string>
+    <string name="photos">Photos</string>
+    <string name="not_implemented">Not implemented</string>
+</resources>
