@@ -5,4 +5,8 @@
     <string name="back_button_cd">Back Button</string>
     <string name="photos">Photos</string>
     <string name="not_implemented">Not implemented</string>
+    <string name="details">Details</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="crop">Crop</string>
 </resources>

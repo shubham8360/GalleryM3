@@ -6,13 +6,12 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import com.project.gallery.models.FileModel
+import com.project.gallery.models.Folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 @Volatile
-var folderSet = HashMap<String, ArrayList<FileModel>>()
-private const val TAG = "StorageUtils"
+var folderSet = HashMap<String, MutableList<FileModel>>()
 
 object StorageUtils {
 
@@ -21,7 +20,7 @@ object StorageUtils {
         val VIDEO: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     }
 
-    suspend fun Context.getAllFiles(uri: Uri = Keys.IMAGES): HashMap<String, ArrayList<FileModel>> {
+    suspend fun Context.getAllFiles(uri: Uri = Keys.IMAGES): List<Folder> {
         folderSet.clear()
         return withContext(Dispatchers.IO) {
             val projection: Array<String> = if (uri == Keys.IMAGES) {
@@ -66,7 +65,10 @@ object StorageUtils {
                     )
                 }
             }
-            getFilesList(projection, uri)
+            val hasMap=getFilesList(projection, uri)
+            hasMap.entries.map {
+                Folder(it.key,it.value)
+            }
         }
     }
 
@@ -77,14 +79,12 @@ object StorageUtils {
     private suspend fun Context.getFilesList(
         projection: Array<String>,
         pUri: Uri
-    ): HashMap<String, ArrayList<FileModel>> {
+    ): HashMap<String, MutableList<FileModel>> {
         log("getVideosList")
         return withContext(Dispatchers.IO) {
             val selection = null
             val selectionArgs = null
             val sortOrder: String = MediaStore.Audio.Media.DISPLAY_NAME + " DESC"
-            val filesList = ArrayList<FileModel>()
-            var folderName = ""
 
             contentResolver.query(pUri, projection, selection, selectionArgs, sortOrder)
                 ?.use { cursor ->
@@ -101,7 +101,7 @@ object StorageUtils {
 
                         var bucketId: Long? = null
                         var bucketPath: String? = null
-                        var bucketName: String? = null
+                        var bucketName: String?
 
                         val path =
                             cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
@@ -113,89 +113,32 @@ object StorageUtils {
                                 cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_ID))
                             bucketName =
                                 cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME))
-                        }//nov else {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                            if (name == null || !name.contains(".")) name =
-                                path?.substring(path.lastIndexOf("/") + 1)
-                            //if (path != null) size = File(path).length()
+                        }
+                        else {
+                            if (name == null || !name.contains("."))
+                                name = path?.substring(path.lastIndexOf("/") + 1)
                             bucketPath = path?.substring(0, path.lastIndexOf("/"))
                             bucketName = bucketPath?.substring(bucketPath.lastIndexOf("/") + 1)
                         }
 
-                        if (folderName == "") {
-                            folderName = bucketName.toString()
-                            filesList.clear()
-                            filesList.add(
-                                FileModel(
-                                    fileId = id,
-                                    path = path,
-                                    name = name,
-                                    size = size,
-                                    modifiedDate = modifiedDate,
-                                    duration = duration,
-                                    bucketId = bucketId,
-                                    bucketPath = bucketPath,
-                                    bucketName = bucketName,
-                                    isSelected = false
-                                )
+                        val folderFileList =
+                            folderSet.getOrPut(bucketName.toString()) { mutableListOf() }
+
+
+                        folderFileList.add(
+                            FileModel(
+                                fileId = id,
+                                path = path,
+                                name = name,
+                                size = size,
+                                modifiedDate = modifiedDate,
+                                duration = duration,
+                                bucketId = bucketId,
+                                bucketPath = bucketPath,
+                                bucketName = bucketName,
+                                isSelected = false
                             )
-                            val arrayList = ArrayList<FileModel>()
-                            arrayList.addAll(filesList)
-                            folderSet[bucketName.toString()] = arrayList
-                        } else {
-                            val oldSelectedFolder = folderName
-                            folderName = bucketName.toString()
-
-                            if (oldSelectedFolder == folderName) {
-                              /*  Log.d(
-                                    TAG,
-                                    "getFilesList: id=$id, path=$path,name=$path,size=$size,modified date=$modifiedDate,duration-=$duration,bucketId=$bucketId,bucketPath=$bucketPath,bucketname=$bucketName"
-                                )*/
-                                filesList.add(
-                                    FileModel(
-                                        fileId = id,
-                                        path = path,
-                                        name = name,
-                                        size = size,
-                                        modifiedDate = modifiedDate,
-                                        duration = duration,
-                                        bucketId = bucketId,
-                                        bucketPath = bucketPath,
-                                        bucketName = bucketName,
-                                        isSelected = false
-                                    )
-                                )
-                                val arrayList = ArrayList<FileModel>()
-                                arrayList.addAll(filesList)
-                                folderSet[bucketName.toString()] = arrayList
-                            } else {
-                                folderName = bucketName.toString()
-                                filesList.clear()
-                                val oldList = folderSet.get(folderName)
-                                if (oldList != null && oldList.isNotEmpty()) filesList.addAll(
-                                    oldList
-                                )
-                                filesList.add(
-                                    FileModel(
-                                        fileId = id,
-                                        path = path,
-                                        name = name,
-                                        size = size,
-                                        modifiedDate = modifiedDate,
-                                        duration = duration,
-                                        bucketId = bucketId,
-                                        bucketPath = bucketPath,
-                                        bucketName = bucketName,
-                                        isSelected = false
-                                    )
-                                )
-                                val arrayList = ArrayList<FileModel>()
-                                arrayList.addAll(filesList)
-                                folderSet[bucketName.toString()] = arrayList
-                            }
-
-                        }
-
+                        )
                     }
                 }
             folderSet

@@ -9,5 +9,6 @@ object Constants {
         arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
     const val PHONE_VIDEOS = "phone_videos"
     const val PHONE_IMAGES="phone_images"
-    const val ID_CONST="id"
+    const val ID_CONST="id_key"
+    const val NAME_CONST="name_key"
 }

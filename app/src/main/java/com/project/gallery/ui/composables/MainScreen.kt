@@ -16,6 +16,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +35,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavHostController = rememberNavController(), viewModel: MainViewModel) {
+fun MainScreen(
+    navController: NavHostController = rememberNavController(),
+    viewModel: MainViewModel
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember {
@@ -48,7 +52,8 @@ fun MainScreen(navController: NavHostController = rememberNavController(), viewM
         val permission by remember {
             mutableStateOf(PermissionManager.isPermission(context, Constants.PERMISSIONS))
         }
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        val scrollBehavior =
+            TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state = rememberTopAppBarState())
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -80,8 +85,13 @@ fun MainScreen(navController: NavHostController = rememberNavController(), viewM
             }
         ) { padding ->
             if (permission) {
-                ImageScreen(modifier = Modifier.padding(padding),viewModel) { id ->
-                    navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
+                ImageScreen(
+                    modifier = Modifier.padding(padding),
+                    viewModel = viewModel,
+                    onImageClick = { id ->
+                        navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
+                    }) {name->
+                    navController.navigate(Route.FOLDER_OPEN_SCREEN+"/$name")
                 }
             }
         }
