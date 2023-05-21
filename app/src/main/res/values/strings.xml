@@ -9,4 +9,7 @@
     <string name="share">Share</string>
     <string name="delete">Delete</string>
     <string name="crop">Crop</string>
+    <string name="videos">Videos</string>
+    <string name="images">Images</string>
+    <string name="share_image">Share Image</string>
 </resources>

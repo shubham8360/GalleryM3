@@ -1,6 +1,7 @@
 package com.project.gallery.ui.composables
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,8 +47,51 @@ fun ImageScreen(
     onMoreClick: (name: String) -> Unit
 ) {
     val folderList by viewModel.folderList.collectAsStateWithLifecycle()
+    val imagesList by viewModel.allImagesList.collectAsStateWithLifecycle()
 
     LazyColumn(modifier = modifier) {
+        item {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recent",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    if (imagesList.size > 10)
+                        IconButton(onClick = {
+//                            onMoreClick.invoke(it.name)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = null
+                            )
+                        }
+                }
+                LazyRow(
+                    modifier = Modifier.padding(vertical = 5.dp),
+                    contentPadding = PaddingValues(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    items(imagesList) { image ->
+                        ImageItem(
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(100.dp)
+                                .clickable {
+                                    onImageClick(image.fileId)
+                                }, image = image,
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
         items(folderList) {
             Column {
                 Row(
@@ -90,10 +133,8 @@ fun ImageScreen(
                     }
                 }
             }
-
         }
     }
-
 }
 
 
@@ -101,25 +142,22 @@ fun ImageScreen(
 fun ImageItem(
     modifier: Modifier = Modifier,
     image: FileModel,
-    contentScale: ContentScale
+    contentScale: ContentScale,
 ) {
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(image.path)
             .crossfade(true)
+            .allowHardware(true)
             .build()
     )
 
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(3.dp),
-        shape = RoundedCornerShape(3.dp)
-    ) {
+    Card(modifier = modifier, shape = RoundedCornerShape(3.dp)) {
         Image(
             painter = painter,
             contentDescription = stringResource(R.string.cd_gallery_photo),
-            modifier = modifier,
-            contentScale = contentScale
+            modifier = modifier.background(MaterialTheme.colorScheme.surface),
+            contentScale = contentScale,
         )
     }
 }

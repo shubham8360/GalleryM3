@@ -48,9 +48,8 @@ private const val TAG = "ImageOpenScreen"
 fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel) {
     val imageId = navController.currentBackStackEntry?.arguments?.getLong(ID_CONST)
 
-    val folderList by viewModel.folderList.collectAsStateWithLifecycle()
+    val list by viewModel.allImagesList.collectAsStateWithLifecycle()
 
-    val list = folderList.flatMap { it.content }
 
     val locateItem = list.indexOf(list.find { it.fileId == imageId })
     val currentIndex by remember {
@@ -101,7 +100,10 @@ fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel
                         })
                     DropdownMenuItem(
                         text = { Text(text = stringResource(R.string.delete)) },
-                        onClick = { openMenu = !openMenu })
+                        onClick = {
+
+                            openMenu = !openMenu
+                        })
                     DropdownMenuItem(
                         text = { Text(text = stringResource(R.string.crop)) },
                         onClick = { openMenu = !openMenu })

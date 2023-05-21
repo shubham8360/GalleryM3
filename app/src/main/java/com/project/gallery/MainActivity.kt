@@ -50,7 +50,11 @@ class MainActivity : ComponentActivity() {
                 val viewModel: MainViewModel = hiltViewModel()
                 NavHost(navController = navController, startDestination = Route.HOME_SCREEN) {
                     composable(route = Route.HOME_SCREEN) {
-                        MainScreen(navController, viewModel)
+                        MainScreen(viewModel, onImageClick = {
+                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
+                        }, onMoreClick = { folderName ->
+                            navController.navigate(Route.FOLDER_OPEN_SCREEN + "/$folderName")
+                        })
                     }
                     composable(Route.IMAGE_OPEN_SCREEN + "/{$ID_CONST}", arguments = listOf(
                         navArgument(ID_CONST) {
@@ -69,7 +73,7 @@ class MainActivity : ComponentActivity() {
                         val name =
                             navController.currentBackStackEntry?.arguments?.getString(NAME_CONST)
                         name?.let {
-                            FolderImages(viewModel,name) { id ->
+                            FolderImages(viewModel, name) { id ->
                                 navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
                             }
                         }

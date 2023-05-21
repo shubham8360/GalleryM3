@@ -6,7 +6,6 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import com.project.gallery.models.FileModel
-import com.project.gallery.models.Folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -20,7 +19,7 @@ object StorageUtils {
         val VIDEO: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     }
 
-    suspend fun Context.getAllFiles(uri: Uri = Keys.IMAGES): List<Folder> {
+    suspend fun Context.getAllFiles(uri: Uri = Keys.IMAGES): HashMap<String, MutableList<FileModel>> {
         folderSet.clear()
         return withContext(Dispatchers.IO) {
             val projection: Array<String> = if (uri == Keys.IMAGES) {
@@ -65,10 +64,8 @@ object StorageUtils {
                     )
                 }
             }
-            val hasMap=getFilesList(projection, uri)
-            hasMap.entries.map {
-                Folder(it.key,it.value)
-            }
+            val hashMAp = getFilesList(projection, uri)
+            hashMAp
         }
     }
 
@@ -113,8 +110,7 @@ object StorageUtils {
                                 cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_ID))
                             bucketName =
                                 cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME))
-                        }
-                        else {
+                        } else {
                             if (name == null || !name.contains("."))
                                 name = path?.substring(path.lastIndexOf("/") + 1)
                             bucketPath = path?.substring(0, path.lastIndexOf("/"))

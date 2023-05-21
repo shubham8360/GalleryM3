@@ -6,8 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.project.gallery.models.FileModel
 import com.project.gallery.models.Folder
+import com.project.gallery.utils.Constants
+import com.project.gallery.utils.Constants.FOLDER_LIST
 import com.project.gallery.utils.Constants.PHONE_IMAGES
 import com.project.gallery.utils.Constants.PHONE_VIDEOS
+import com.project.gallery.utils.PermissionManager
 import com.project.gallery.utils.StorageUtils
 import com.project.gallery.utils.StorageUtils.getAllFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,14 +26,18 @@ class MainViewModel @Inject constructor(
     val videoList =
         savedStateHandle.getStateFlow(PHONE_VIDEOS, HashMap<String, ArrayList<FileModel>>())
     val folderList =
-        savedStateHandle.getStateFlow(PHONE_IMAGES, emptyList<Folder>())
+        savedStateHandle.getStateFlow(FOLDER_LIST, emptyList<Folder>())
+    val allImagesList =
+        savedStateHandle.getStateFlow(PHONE_IMAGES, emptyList<FileModel>())
 
 
     init {
-        onPermission()
+        if (PermissionManager.isPermission(app, Constants.PERMISSIONS)) {
+            onPermission()
+        }
     }
 
-    private fun onPermission() {
+    fun onPermission() {
 //        scanVideos()
         scanImages()
     }
@@ -45,8 +52,10 @@ class MainViewModel @Inject constructor(
 
     private fun scanImages() {
         viewModelScope.launch {
-            val list = app.getAllFiles(StorageUtils.Keys.IMAGES)
-            savedStateHandle[PHONE_IMAGES] = list
+            val hashMap = app.getAllFiles(StorageUtils.Keys.IMAGES)
+            savedStateHandle[FOLDER_LIST] = hashMap.entries.toList().map { Folder(it.key, it.value) }
+            savedStateHandle[PHONE_IMAGES] =
+                hashMap.entries.toList().flatMap { it.value }.sortedByDescending { it.modifiedDate }
         }
     }
 
