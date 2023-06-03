@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = Route.HOME_SCREEN) {
                     composable(route = Route.HOME_SCREEN) {
                         MainScreen(viewModel, onImageClick = {
-                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id")
+                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$it")
                         }, onMoreClick = { folderName ->
                             navController.navigate(Route.FOLDER_OPEN_SCREEN + "/$folderName")
                         })

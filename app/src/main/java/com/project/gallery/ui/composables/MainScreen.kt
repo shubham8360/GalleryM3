@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -109,7 +110,12 @@ fun MainScreen(
 
                     screens.forEach { screen ->
                         NavigationBarItem(
-                            icon = { screen.icon },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = screen.icon),
+                                    contentDescription = null
+                                )
+                            },
                             label = { Text(text = stringResource(screen.tittle)) },
                             selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                             onClick = {
@@ -128,7 +134,6 @@ fun MainScreen(
             NavHost(
                 navController = navController,
                 startDestination = BottomBarScreens.HomeScreen.route,
-                modifier = Modifier.padding(innerPadding)
             ) {
                 composable(BottomBarScreens.HomeScreen.route) {
                     ImageScreen(
