@@ -1,8 +1,9 @@
-package com.project.gallery.ui.composables
+package com.project.gallery.ui.composables.bottom_nav
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.project.gallery.R
+import com.project.gallery.ui.composables.Route
 import com.project.gallery.utils.AppIcon
 
 

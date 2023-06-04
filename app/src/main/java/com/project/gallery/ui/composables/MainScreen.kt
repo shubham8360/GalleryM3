@@ -21,6 +21,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,8 +37,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.project.gallery.R
+import com.project.gallery.ui.composables.bottom_nav.BottomBarScreens
+import com.project.gallery.ui.composables.bottom_nav.ImageScreen
+import com.project.gallery.ui.composables.bottom_nav.VideoScreenMain
+import com.project.gallery.utils.AppIcon
 import com.project.gallery.utils.Constants
-import com.project.gallery.utils.PermissionManager
+import com.project.gallery.utils.PermissionManager.isPermission
 import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
 
@@ -45,7 +50,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
-    onImageClick: (id: Long) -> Unit,
+    onImageClick: (bucketName:String,id: Long) -> Unit,
     onMoreClick: (name: String) -> Unit
 ) {
     val context = LocalContext.current
@@ -62,11 +67,12 @@ fun MainScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         val permission by remember {
-            mutableStateOf(PermissionManager.isPermission(context, Constants.PERMISSIONS))
+            mutableStateOf(isPermission(context, Constants.PERMISSIONS))
         }
+        val isDarkTheme by viewModel.isDarkThemeEnabled.observeAsState()
 
         if (permission) {
-            viewModel.onPermission()
+            viewModel.scanImages()
         }
         val scrollBehavior =
             TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state = rememberTopAppBarState())
@@ -94,14 +100,27 @@ fun MainScreen(
                                 contentDescription = context.getString(R.string.back_button_cd)
                             )
                         }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                isDarkTheme?.let {
+                                    viewModel.setDarkTheme(!it)
+                                }
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(id = if (isDarkTheme == true) AppIcon.Night else AppIcon.Day),
+                                contentDescription = null
+                            )
+                        }
                     }
                 )
             }, snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                NavigationBar() {
-
+                NavigationBar {
                     val screens = listOf(
                         BottomBarScreens.HomeScreen,
                         BottomBarScreens.VideoScreen
@@ -139,8 +158,8 @@ fun MainScreen(
                     ImageScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
-                        onImageClick = { id ->
-                            onImageClick.invoke(id)
+                        onImageClick = { bucket,id ->
+                            onImageClick.invoke(bucket,id)
                         },
                         onMoreClick = { folderName ->
                             onMoreClick.invoke(folderName)

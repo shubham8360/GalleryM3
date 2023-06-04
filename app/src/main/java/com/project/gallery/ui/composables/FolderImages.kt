@@ -16,12 +16,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.project.gallery.models.FileModel
 import com.project.gallery.vm.MainViewModel
 
@@ -29,17 +26,18 @@ import com.project.gallery.vm.MainViewModel
 @Composable
 fun FolderImages(
     viewModel: MainViewModel,
-    name: String,
-    onImageClick: (id: Long) -> Unit
+    folderName: String,
+    onImageClick: (bucketName:String,id: Long) -> Unit
 ) {
 
-    val foldersList by viewModel.folderList.collectAsStateWithLifecycle()
-    val folderContent=foldersList.filter { it.name==name}.flatMap {
+    val foldersList = viewModel.folderList
+    val folderContent=foldersList.filter { it.name==folderName}.flatMap {
         it.content
     }
+
     Scaffold(topBar = {
         TopAppBar(title = {
-            Text(text = name)
+            Text(text = folderName)
         })
     }) {
         Column (modifier = Modifier.padding(it)){
@@ -58,7 +56,7 @@ fun FolderImages(
                             .fillMaxWidth()
                             .height(if (index % 2 == 0) 200.dp else 250.dp)
                             .clickable {
-                                onImageClick(image.fileId)
+                                onImageClick(folderName,image.fileId)
                             }, image = image,
                         contentScale = ContentScale.Crop
                     )

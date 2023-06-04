@@ -8,6 +8,7 @@ import android.util.Log
 import com.project.gallery.models.FileModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 @Volatile
 var folderSet = HashMap<String, MutableList<FileModel>>()
@@ -117,9 +118,15 @@ object StorageUtils {
                             bucketName = bucketPath?.substring(bucketPath.lastIndexOf("/") + 1)
                         }
 
-                        val folderFileList =
-                            folderSet.getOrPut(bucketName.toString()) { mutableListOf() }
-
+                        val folderFileList = bucketName?.let {
+                            folderSet.getOrPut(it) { mutableListOf() }
+                        } ?: kotlin.run {
+                            val extractName=File(path).parentFile?.name ?: "No Name"
+                            bucketName=extractName
+                            folderSet.getOrPut(
+                                extractName
+                            ) { mutableListOf() }
+                        }
 
                         folderFileList.add(
                             FileModel(

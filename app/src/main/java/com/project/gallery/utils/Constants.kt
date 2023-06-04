@@ -1,8 +1,6 @@
 package com.project.gallery.utils
 
 import android.Manifest
-import com.project.gallery.R
-import com.project.gallery.models.FileModel
 
 object Constants {
     val PERMISSIONS =
@@ -12,4 +10,8 @@ object Constants {
     const val FOLDER_LIST="folder_list"
     const val ID_CONST="id_key"
     const val NAME_CONST="name_key"
+    const val FOLDER_NAME="name_key"
+    const val THEME_VALUE = "theme_value"
+    const val SHARED_PREFERENCES="shared_prefs"
+
 }
