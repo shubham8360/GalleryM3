@@ -30,6 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+
     private val viewModel by viewModels<MainViewModel>()
     private var requestLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -52,28 +53,30 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val isDarkMode by viewModel.isDarkThemeEnabled.observeAsState()
-            GalleryM3Theme(darkTheme = isDarkMode==true) {
+            GalleryM3Theme(darkTheme = isDarkMode == true) {
                 val navController = rememberNavController()
                 val viewModel: MainViewModel = hiltViewModel()
+
                 NavHost(navController = navController, startDestination = Route.HOME_SCREEN) {
                     composable(route = Route.HOME_SCREEN) {
-                        MainScreen(viewModel, onImageClick = {bucket,id->
-                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id"+"/$bucket")
+                        MainScreen(viewModel, onImageClick = { bucket, id ->
+                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id" + "/$bucket")
                         }, onMoreClick = { folderName ->
                             navController.navigate(Route.FOLDER_OPEN_SCREEN + "/$folderName")
                         })
                     }
-                    composable(Route.IMAGE_OPEN_SCREEN + "/{$ID_CONST}"+"/{$FOLDER_NAME}", arguments = listOf(
-                        navArgument(ID_CONST) {
-                            type = NavType.LongType
-                            defaultValue = 1L
-                        },
-                        navArgument(FOLDER_NAME){
-                            type= NavType.StringType
-                            defaultValue=null
-                            nullable=true
-                        }
-                    )) {
+                    composable(Route.IMAGE_OPEN_SCREEN + "/{$ID_CONST}" + "/{$FOLDER_NAME}",
+                        arguments = listOf(
+                            navArgument(ID_CONST) {
+                                type = NavType.LongType
+                                defaultValue = 1L
+                            },
+                            navArgument(FOLDER_NAME) {
+                                type = NavType.StringType
+                                defaultValue = null
+                                nullable = true
+                            }
+                        )) {
                         ImageOpenedScreen(navController, viewModel)
                     }
                     composable(
@@ -85,9 +88,11 @@ class MainActivity : ComponentActivity() {
                         val name =
                             navController.currentBackStackEntry?.arguments?.getString(NAME_CONST)
                         name?.let {
-                            FolderImages(viewModel, name) {bucket, id ->
-                                navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id"+"/$bucket")
-                            }
+                            FolderImages(viewModel, name, onImageClick = { bucket, id ->
+                                navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id" + "/$bucket")
+                            }, onBackClick = {
+                                navController.popBackStack()
+                            })
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.project.gallery.models
 
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -15,5 +16,6 @@ data class FileModel(
     val bucketId: Long?,
     val bucketPath: String?,
     val bucketName: String?,
-    val isSelected: Boolean
+    val isSelected: Boolean,
+    val uri: Uri
 ) : Parcelable

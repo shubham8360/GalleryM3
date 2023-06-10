@@ -11,14 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.project.gallery.R
 import com.project.gallery.models.FileModel
 import com.project.gallery.vm.MainViewModel
 
@@ -27,10 +35,12 @@ import com.project.gallery.vm.MainViewModel
 fun FolderImages(
     viewModel: MainViewModel,
     folderName: String,
-    onImageClick: (bucketName:String,id: Long) -> Unit
+    onImageClick: (bucketName:String,id: Long) -> Unit,
+    onBackClick:()->Unit
 ) {
 
-    val foldersList = viewModel.folderList
+    val foldersList by  viewModel.folderList.observeAsState(emptyList())
+
     val folderContent=foldersList.filter { it.name==folderName}.flatMap {
         it.content
     }
@@ -38,6 +48,10 @@ fun FolderImages(
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(text = folderName)
+        }, navigationIcon = {
+            IconButton(onClick = { onBackClick() }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back_button_cd) )
+            }
         })
     }) {
         Column (modifier = Modifier.padding(it)){
@@ -56,7 +70,7 @@ fun FolderImages(
                             .fillMaxWidth()
                             .height(if (index % 2 == 0) 200.dp else 250.dp)
                             .clickable {
-                                onImageClick(folderName,image.fileId)
+                                onImageClick(folderName, image.fileId)
                             }, image = image,
                         contentScale = ContentScale.Crop
                     )

@@ -1,5 +1,6 @@
 package com.project.gallery.utils
 
+import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.os.Build
@@ -100,6 +101,8 @@ object StorageUtils {
                         var bucketId: Long? = null
                         var bucketPath: String? = null
                         var bucketName: String?
+                        val contentUri = MediaStore.Files.getContentUri("external")
+
 
                         val path =
                             cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
@@ -121,12 +124,13 @@ object StorageUtils {
                         val folderFileList = bucketName?.let {
                             folderSet.getOrPut(it) { mutableListOf() }
                         } ?: kotlin.run {
-                            val extractName=File(path).parentFile?.name ?: "No Name"
-                            bucketName=extractName
+                            val extractName = File(path).parentFile?.name ?: "No Name"
+                            bucketName = extractName
                             folderSet.getOrPut(
                                 extractName
                             ) { mutableListOf() }
                         }
+                        val uri = ContentUris.withAppendedId(pUri, id)
 
                         folderFileList.add(
                             FileModel(
@@ -134,12 +138,13 @@ object StorageUtils {
                                 path = path,
                                 name = name,
                                 size = size,
+                                uri = uri,
                                 modifiedDate = modifiedDate,
                                 duration = duration,
                                 bucketId = bucketId,
                                 bucketPath = bucketPath,
                                 bucketName = bucketName,
-                                isSelected = false
+                                isSelected = false,
                             )
                         )
                     }

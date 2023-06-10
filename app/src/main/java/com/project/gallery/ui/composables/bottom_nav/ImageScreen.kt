@@ -20,11 +20,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.project.gallery.ui.composables.ImageItem
 import com.project.gallery.vm.MainViewModel
 
@@ -36,9 +36,9 @@ fun ImageScreen(
     onImageClick: (bucketName:String,image: Long) -> Unit,
     onMoreClick: (name: String) -> Unit
 ) {
-    val imagesList by viewModel.allImagesList.collectAsStateWithLifecycle()
+    val imagesList by viewModel.allImagesList.observeAsState(emptyList())
 
-    val folderList = viewModel.folderList
+    val folderList by  viewModel.folderList.observeAsState(emptyList())
 
 
     LazyColumn(modifier = modifier) {
@@ -55,7 +55,7 @@ fun ImageScreen(
                         text = "Recent",
                         style = MaterialTheme.typography.titleLarge
                     )
-                    if (imagesList.size > 10)
+                    if ((imagesList?.size ?: 0) > 10)
                         IconButton(onClick = {
 //                            onMoreClick.invoke(it.name)
                         }) {
@@ -70,13 +70,13 @@ fun ImageScreen(
                     contentPadding = PaddingValues(5.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    items(imagesList) { image ->
+                    items(imagesList?: emptyList()) { image ->
                         ImageItem(
                             modifier = Modifier
                                 .width(100.dp)
                                 .height(100.dp)
                                 .clickable {
-                                    onImageClick(image.bucketName!!,image.fileId)
+                                    onImageClick(image.bucketName!!, image.fileId)
                                 }, image = image,
                             contentScale = ContentScale.Crop
                         )
@@ -84,7 +84,7 @@ fun ImageScreen(
                 }
             }
         }
-        items(folderList) {
+        items(folderList, key = {it.name}) {
             Column {
                 Row(
                     modifier = Modifier
@@ -112,13 +112,13 @@ fun ImageScreen(
                     contentPadding = PaddingValues(5.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    items(it.content) { image ->
+                    items(it.content, key = {it.fileId}) { image ->
                         ImageItem(
                             modifier = Modifier
                                 .width(100.dp)
                                 .height(100.dp)
                                 .clickable {
-                                    onImageClick(image.bucketName!!,image.fileId)
+                                    onImageClick(image.bucketName!!, image.fileId)
                                 }, image = image,
                             contentScale = ContentScale.Crop
                         )

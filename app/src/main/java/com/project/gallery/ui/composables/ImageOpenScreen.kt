@@ -1,6 +1,11 @@
 package com.project.gallery.ui.composables
 
+import android.app.Activity.RESULT_OK
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,11 +27,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,6 +50,7 @@ import androidx.navigation.NavHostController
 import com.project.gallery.R
 import com.project.gallery.utils.Constants.FOLDER_NAME
 import com.project.gallery.utils.Constants.ID_CONST
+import com.project.gallery.utils.deleteFile
 import com.project.gallery.utils.shareImageFile
 import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
@@ -51,22 +59,41 @@ private const val TAG = "ImageOpenScreen"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel) {
-    val args=navController.currentBackStackEntry?.arguments
+fun ImageOpenedScreen(
+    navController: NavHostController,
+    viewModel: MainViewModel
+) {
+    val args = navController.currentBackStackEntry?.arguments
     val imageId = args?.getLong(ID_CONST)
     val bucketName = args?.getString(FOLDER_NAME)
+    val context = LocalContext.current
 
-    val list = viewModel.folderList.find { it.name==bucketName }?.content?: emptyList()
 
-
-    val locateItem = list.indexOf(list.find { it.fileId == imageId })
-    val currentIndex by remember {
-        mutableStateOf(locateItem)
+    val snackBar = remember {
+        SnackbarHostState()
     }
     val scope = rememberCoroutineScope()
 
 
-    val context = LocalContext.current
+
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show()
+                viewModel.scanImages()
+            }
+        }
+    val list2 by viewModel.folderList.observeAsState(emptyList())
+
+    val specificDir = list2.find { it.name == bucketName }?.content ?: emptyList()
+
+
+    val locateItem = specificDir.indexOf(specificDir.find { it.fileId == imageId })
+    val currentIndex by remember {
+        mutableStateOf(locateItem)
+    }
+
 
     var openMenu by remember {
         mutableStateOf(false)
@@ -103,15 +130,30 @@ fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel
                         text = { Text(text = stringResource(R.string.share)) },
                         onClick = {
                             scope.launch {
-                                shareImageFile(list[pagerState.currentPage], context)
+                                shareImageFile(specificDir[pagerState.currentPage], context)
                                 openMenu = !openMenu
                             }
                         })
                     DropdownMenuItem(
                         text = { Text(text = stringResource(R.string.delete)) },
                         onClick = {
+                            scope.launch {
 
-                            openMenu = !openMenu
+                                val intentSender = deleteFile(
+                                    specificDir[currentIndex],
+                                    context
+                                )
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(intentSender!!).build()
+                                )
+                                /* val intentSender = deleteFile(list[currentIndex], context)
+                                 intentSender?.let {
+                                     intentSenderLauncher.launch(
+                                         IntentSenderRequest.Builder(it).build()
+                                     )
+                                 }*/
+                                openMenu = !openMenu
+                            }
                         })
                     DropdownMenuItem(
                         text = { Text(text = stringResource(R.string.crop)) },
@@ -126,7 +168,7 @@ fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            pageCount = list.size,
+            pageCount = specificDir.size,
             state = pagerState
         ) { page ->
 
@@ -152,7 +194,7 @@ fun ImageOpenedScreen(navController: NavHostController, viewModel: MainViewModel
                             scaleX = imageSize
                             scaleY = imageSize
                         },
-                    image = list[page],
+                    image = specificDir[page],
                     contentScale = ContentScale.Fit
                 )
             }
