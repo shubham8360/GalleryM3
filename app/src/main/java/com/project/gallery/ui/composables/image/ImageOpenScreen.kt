@@ -1,4 +1,4 @@
-package com.project.gallery.ui.composables
+package com.project.gallery.ui.composables.image
 
 import android.app.Activity.RESULT_OK
 import android.util.Log
@@ -27,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -69,9 +68,6 @@ fun ImageOpenedScreen(
     val context = LocalContext.current
 
 
-    val snackBar = remember {
-        SnackbarHostState()
-    }
     val scope = rememberCoroutineScope()
 
 
@@ -146,18 +142,9 @@ fun ImageOpenedScreen(
                                 launcher.launch(
                                     IntentSenderRequest.Builder(intentSender!!).build()
                                 )
-                                /* val intentSender = deleteFile(list[currentIndex], context)
-                                 intentSender?.let {
-                                     intentSenderLauncher.launch(
-                                         IntentSenderRequest.Builder(it).build()
-                                     )
-                                 }*/
                                 openMenu = !openMenu
                             }
                         })
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.crop)) },
-                        onClick = { openMenu = !openMenu })
                 }
             }
         )
@@ -194,7 +181,7 @@ fun ImageOpenedScreen(
                             scaleX = imageSize
                             scaleY = imageSize
                         },
-                    image = specificDir[page],
+                    fileModel = specificDir[page],
                     contentScale = ContentScale.Fit
                 )
             }

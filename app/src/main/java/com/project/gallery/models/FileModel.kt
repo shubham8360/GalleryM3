@@ -17,5 +17,6 @@ data class FileModel(
     val bucketPath: String?,
     val bucketName: String?,
     val isSelected: Boolean,
-    val uri: Uri
+    val uri: Uri,
+    var isVideo:Boolean=false
 ) : Parcelable

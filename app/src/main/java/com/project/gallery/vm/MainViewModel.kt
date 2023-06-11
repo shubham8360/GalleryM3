@@ -9,10 +9,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.project.gallery.models.FileModel
 import com.project.gallery.models.Folder
-import com.project.gallery.utils.Constants
+import com.project.gallery.utils.Constants.PERMISSIONS
 import com.project.gallery.utils.Constants.SHARED_PREFERENCES
 import com.project.gallery.utils.Constants.THEME_VALUE
-import com.project.gallery.utils.PermissionManager
+import com.project.gallery.utils.PermissionManager.isPermission
 import com.project.gallery.utils.StorageUtils
 import com.project.gallery.utils.StorageUtils.getAllFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +34,8 @@ class MainViewModel @Inject constructor(
     var folderList = MutableLiveData<List<Folder>>()
     val allImagesList = MutableLiveData<List<FileModel>>()
 
+    var allVideos=MutableLiveData<List<Folder>>()
+
     var isDarkThemeEnabled =
         savedStateHandle.getLiveData(THEME_VALUE, sharedPreferences.getBoolean(THEME_VALUE, false))
 
@@ -43,16 +45,19 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        if (PermissionManager.isPermission(app, Constants.PERMISSIONS)) {
+        if (isPermission(app, PERMISSIONS)) {
             scanImages()
+        }
+        if (isPermission(app, PERMISSIONS)) {
+            scanVideos()
         }
     }
 
 
-    private fun scanVideos() {
+     fun scanVideos() {
         viewModelScope.launch() {
-            /*    val videosHashmap = app.getAllFiles(StorageUtils.Keys.VIDEO)
-                savedStateHandle[PHONE_VIDEOS] = videosHashmap*/
+                val videosHashmap = app.getAllFiles(StorageUtils.Keys.VIDEO)
+                allVideos.postValue(videosHashmap.map { Folder(it.key,it.value) })
         }
     }
 
@@ -61,7 +66,7 @@ class MainViewModel @Inject constructor(
             val hashMap = app.getAllFiles(StorageUtils.Keys.IMAGES)
             folderList.postValue(hashMap.entries.toList().map { Folder(it.key, it.value) })
             allImagesList.postValue(hashMap.entries.toList().flatMap { it.value }
-                .sortedByDescending { it.modifiedDate })
+                .sortedByDescending { it.modifiedDate?:0 })
         }
     }
 

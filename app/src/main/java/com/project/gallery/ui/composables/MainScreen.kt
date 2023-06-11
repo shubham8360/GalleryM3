@@ -83,7 +83,7 @@ fun MainScreen(
                 MediumTopAppBar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        Text(text = context.getString(R.string.photos))
+                        Text(text = context.getString(R.string.videos))
                     },
                     navigationIcon = {
                         IconButton(onClick = {
@@ -166,7 +166,9 @@ fun MainScreen(
                         })
                 }
                 composable(BottomBarScreens.VideoScreen.route) {
-                    VideoScreenMain()
+                    VideoScreenMain(Modifier.padding(innerPadding),viewModel){bucket,id->
+                        navController.navigate(Route.VIDEO_OPEN_SCREEN+"$id"+ bucket)
+                    }
                 }
             }
         }

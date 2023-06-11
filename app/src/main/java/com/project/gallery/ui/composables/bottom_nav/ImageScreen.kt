@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.project.gallery.ui.composables.ImageItem
+import com.project.gallery.ui.composables.image.ImageItem
 import com.project.gallery.vm.MainViewModel
 
 
@@ -77,7 +77,7 @@ fun ImageScreen(
                                 .height(100.dp)
                                 .clickable {
                                     onImageClick(image.bucketName!!, image.fileId)
-                                }, image = image,
+                                }, fileModel = image,
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -119,7 +119,7 @@ fun ImageScreen(
                                 .height(100.dp)
                                 .clickable {
                                     onImageClick(image.bucketName!!, image.fileId)
-                                }, image = image,
+                                }, fileModel = image,
                             contentScale = ContentScale.Crop
                         )
                     }

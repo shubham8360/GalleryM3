@@ -1,4 +1,4 @@
-package com.project.gallery.ui.composables
+package com.project.gallery.ui.composables.image
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -71,7 +71,7 @@ fun FolderImages(
                             .height(if (index % 2 == 0) 200.dp else 250.dp)
                             .clickable {
                                 onImageClick(folderName, image.fileId)
-                            }, image = image,
+                            }, fileModel = image,
                         contentScale = ContentScale.Crop
                     )
                 }

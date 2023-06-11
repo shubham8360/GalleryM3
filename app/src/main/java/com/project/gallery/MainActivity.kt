@@ -14,10 +14,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.project.gallery.ui.composables.FolderImages
-import com.project.gallery.ui.composables.ImageOpenedScreen
 import com.project.gallery.ui.composables.MainScreen
 import com.project.gallery.ui.composables.Route
+import com.project.gallery.ui.composables.image.FolderImages
+import com.project.gallery.ui.composables.image.ImageOpenedScreen
+import com.project.gallery.ui.composables.video.VideoOpenScreen
 import com.project.gallery.ui.theme.GalleryM3Theme
 import com.project.gallery.utils.Constants.FOLDER_NAME
 import com.project.gallery.utils.Constants.ID_CONST
@@ -78,6 +79,14 @@ class MainActivity : ComponentActivity() {
                             }
                         )) {
                         ImageOpenedScreen(navController, viewModel)
+                    }
+                    composable(Route.VIDEO_OPEN_SCREEN+"/{$ID_CONST}"+"/{$FOLDER_NAME}", arguments = listOf(
+                        navArgument(ID_CONST){
+                            type= NavType.LongType
+                            defaultValue=1L
+                        }
+                    )){
+                        VideoOpenScreen(viewModel = viewModel)
                     }
                     composable(
                         route = Route.FOLDER_OPEN_SCREEN + "/{$NAME_CONST}",

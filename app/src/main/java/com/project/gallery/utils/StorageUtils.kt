@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.database.getLongOrNull
 import com.project.gallery.models.FileModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -93,7 +94,7 @@ object StorageUtils {
                         var name =
                             cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
                         val modifiedDate =
-                            cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED))
+                            cursor.getLongOrNull(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED))?:0
                         val size =
                             cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE))
                         var duration: Int? = null
@@ -101,7 +102,6 @@ object StorageUtils {
                         var bucketId: Long? = null
                         var bucketPath: String? = null
                         var bucketName: String?
-                        val contentUri = MediaStore.Files.getContentUri("external")
 
 
                         val path =
@@ -132,6 +132,8 @@ object StorageUtils {
                         }
                         val uri = ContentUris.withAppendedId(pUri, id)
 
+
+
                         folderFileList.add(
                             FileModel(
                                 fileId = id,
@@ -145,6 +147,7 @@ object StorageUtils {
                                 bucketPath = bucketPath,
                                 bucketName = bucketName,
                                 isSelected = false,
+                                isVideo = pUri===Keys.VIDEO
                             )
                         )
                     }
