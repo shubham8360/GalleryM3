@@ -20,8 +20,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -29,19 +29,20 @@ import androidx.compose.ui.unit.dp
 import com.project.gallery.R
 import com.project.gallery.models.FileModel
 import com.project.gallery.vm.MainViewModel
+import java.math.BigInteger
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FolderImages(
     viewModel: MainViewModel,
     folderName: String,
-    onImageClick: (bucketName:String,id: Long) -> Unit,
+    onImageClick: (bucketName:String,id: BigInteger) -> Unit,
     onBackClick:()->Unit
 ) {
 
-    val foldersList by  viewModel.folderList.observeAsState(emptyList())
+    val foldersList by  viewModel.folderList.collectAsState(emptyList())
 
-    val folderContent=foldersList.filter { it.name==folderName}.flatMap {
+    val folderContent=foldersList.filter { it.name ==folderName}.flatMap {
         it.content
     }
 

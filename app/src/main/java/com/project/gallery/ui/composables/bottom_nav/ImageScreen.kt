@@ -19,26 +19,32 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.project.gallery.ui.composables.image.ImageItem
 import com.project.gallery.vm.MainViewModel
+import java.math.BigInteger
 
 
 @Composable
 fun ImageScreen(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    onImageClick: (bucketName:String,image: Long) -> Unit,
+    onImageClick: (bucketName: String, image: BigInteger) -> Unit,
     onMoreClick: (name: String) -> Unit
 ) {
-    val imagesList by viewModel.allImagesList.observeAsState(emptyList())
+    val imagesList by viewModel.allImagesList.collectAsState(emptyList())
 
-    val folderList by  viewModel.folderList.observeAsState(emptyList())
+    val folderList by viewModel.folderList.collectAsState(emptyList())
+
+    LaunchedEffect(folderList) {
+        viewModel.tempFolderList = folderList
+    }
 
 
     LazyColumn(modifier = modifier) {
@@ -55,7 +61,7 @@ fun ImageScreen(
                         text = "Recent",
                         style = MaterialTheme.typography.titleLarge
                     )
-                    if ((imagesList?.size ?: 0) > 10)
+                    if (imagesList.size > 10)
                         IconButton(onClick = {
 //                            onMoreClick.invoke(it.name)
                         }) {
@@ -70,7 +76,7 @@ fun ImageScreen(
                     contentPadding = PaddingValues(5.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    items(imagesList?: emptyList()) { image ->
+                    items(imagesList) { image ->
                         ImageItem(
                             modifier = Modifier
                                 .width(100.dp)
@@ -84,7 +90,7 @@ fun ImageScreen(
                 }
             }
         }
-        items(folderList, key = {it.name}) {
+        items(folderList) {
             Column {
                 Row(
                     modifier = Modifier
@@ -112,7 +118,7 @@ fun ImageScreen(
                     contentPadding = PaddingValues(5.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    items(it.content, key = {it.fileId}) { image ->
+                    items(it.content) { image ->
                         ImageItem(
                             modifier = Modifier
                                 .width(100.dp)

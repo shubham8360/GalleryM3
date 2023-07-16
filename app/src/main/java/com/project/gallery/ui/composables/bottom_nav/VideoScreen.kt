@@ -20,8 +20,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,22 +31,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.project.gallery.ui.composables.image.ImageItem
 import com.project.gallery.vm.MainViewModel
-import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 @Composable
 fun VideoScreenMain(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    onItemClick: (bucket: String, id: Long) -> Unit
+    onItemClick: (bucket: String, id: BigInteger) -> Unit
 ) {
 
-    val list by viewModel.allVideos.observeAsState(emptyList())
+    val list by viewModel.allVideos.collectAsState(emptyList())
     val context = LocalContext.current
+
     val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = Unit) {
-        scope.launch {
-            viewModel.scanVideos()
-        }
+    LaunchedEffect(key1 = list) {
+        viewModel.tempVideoFolder = list
     }
 
     LazyColumn(modifier = modifier) {

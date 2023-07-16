@@ -136,17 +136,16 @@ object StorageUtils {
 
                         folderFileList.add(
                             FileModel(
-                                fileId = id,
+                                fileId = id.toBigInteger(),
                                 path = path,
                                 name = name,
-                                size = size,
-                                uri = uri,
+                                size = size.toBigInteger(),
                                 modifiedDate = modifiedDate,
                                 duration = duration,
-                                bucketId = bucketId,
+                                bucketId = bucketId?.toBigInteger(),
                                 bucketPath = bucketPath,
                                 bucketName = bucketName,
-                                isSelected = false,
+                                uri = uri,
                                 isVideo = pUri===Keys.VIDEO
                             )
                         )

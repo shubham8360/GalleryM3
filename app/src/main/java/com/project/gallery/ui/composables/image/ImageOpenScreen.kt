@@ -32,7 +32,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,9 +69,6 @@ fun ImageOpenedScreen(
 
     val scope = rememberCoroutineScope()
 
-
-
-
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
             if (it.resultCode == RESULT_OK) {
@@ -80,12 +76,13 @@ fun ImageOpenedScreen(
                 viewModel.scanImages()
             }
         }
-    val list2 by viewModel.folderList.observeAsState(emptyList())
+    val list2 = viewModel.tempFolderList
 
     val specificDir = list2.find { it.name == bucketName }?.content ?: emptyList()
 
 
-    val locateItem = specificDir.indexOf(specificDir.find { it.fileId == imageId })
+    val locateItem = specificDir.indexOf(specificDir.find { it.fileId == imageId?.toBigInteger() })
+        .takeIf { it != -1 } ?: 0
     val currentIndex by remember {
         mutableStateOf(locateItem)
     }
@@ -149,8 +146,6 @@ fun ImageOpenedScreen(
             }
         )
     }) {
-
-
         HorizontalPager(
             modifier = Modifier
                 .fillMaxSize()

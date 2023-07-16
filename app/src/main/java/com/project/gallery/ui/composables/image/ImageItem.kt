@@ -5,8 +5,9 @@ import android.os.CancellationSignal
 import android.util.Size
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -16,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.project.gallery.R
@@ -64,11 +66,18 @@ fun ImageItem(
             contentScale = contentScale,
         )
         if (fileModel.isVideo)
-            IconButton(modifier = Modifier.align(Alignment.BottomEnd), onClick = { /*TODO*/ }) {
-                Icon(painter = painterResource(id = R.drawable.ic_play), contentDescription = null, tint = colorResource(
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd).padding(3.dp)
+                    .size(20.dp)
+                 ,
+                painter = painterResource(id = R.drawable.ic_play),
+                contentDescription = null,
+                tint = colorResource(
                     id = R.color.white
-                ))
-            }
+                )
+            )
+
     }
 
 }

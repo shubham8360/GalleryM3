@@ -1,5 +1,6 @@
 package com.project.gallery.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,11 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -45,12 +48,13 @@ import com.project.gallery.utils.Constants
 import com.project.gallery.utils.PermissionManager.isPermission
 import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
-    onImageClick: (bucketName:String,id: Long) -> Unit,
+    onItemClick: (route: String, bucketName: String, id: BigInteger) -> Unit,
     onMoreClick: (name: String) -> Unit
 ) {
     val context = LocalContext.current
@@ -77,13 +81,27 @@ fun MainScreen(
         val scrollBehavior =
             TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state = rememberTopAppBarState())
 
+        var appBarTitle by remember {
+            mutableStateOf("")
+        }
+
+
+        LaunchedEffect(key1 = navBackStackEntry) {
+            Log.d("TAG", "MainScreen: $navBackStackEntry")
+            appBarTitle=when(navBackStackEntry?.destination?.route){
+                Route.VIDEO_SCREEN-> context.getString(R.string.videos)
+                Route.HOME_SCREEN->context.getString(R.string.images)
+                else -> "null"
+            }
+        }
+
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 MediumTopAppBar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        Text(text = context.getString(R.string.videos))
+                        Text(text = appBarTitle)
                     },
                     navigationIcon = {
                         IconButton(onClick = {
@@ -154,20 +172,21 @@ fun MainScreen(
                 navController = navController,
                 startDestination = BottomBarScreens.HomeScreen.route,
             ) {
+
                 composable(BottomBarScreens.HomeScreen.route) {
                     ImageScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
-                        onImageClick = { bucket,id ->
-                            onImageClick.invoke(bucket,id)
+                        onImageClick = { bucket, id ->
+                            onItemClick.invoke(Route.IMAGE_OPEN_SCREEN, bucket, id)
                         },
                         onMoreClick = { folderName ->
                             onMoreClick.invoke(folderName)
                         })
                 }
                 composable(BottomBarScreens.VideoScreen.route) {
-                    VideoScreenMain(Modifier.padding(innerPadding),viewModel){bucket,id->
-                        navController.navigate(Route.VIDEO_OPEN_SCREEN+"$id"+ bucket)
+                    VideoScreenMain(Modifier.padding(innerPadding), viewModel) { bucket, id ->
+                        onItemClick.invoke(Route.VIDEO_OPEN_SCREEN, bucket, id)
                     }
                 }
             }

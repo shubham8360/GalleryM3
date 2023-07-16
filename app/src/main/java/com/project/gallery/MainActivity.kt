@@ -60,12 +60,13 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = Route.HOME_SCREEN) {
                     composable(route = Route.HOME_SCREEN) {
-                        MainScreen(viewModel, onImageClick = { bucket, id ->
-                            navController.navigate(Route.IMAGE_OPEN_SCREEN + "/$id" + "/$bucket")
+                        MainScreen(viewModel, onItemClick = { route,bucket, id ->
+                            navController.navigate("$route/$id/$bucket")
                         }, onMoreClick = { folderName ->
-                            navController.navigate(Route.FOLDER_OPEN_SCREEN + "/$folderName")
+                                navController.navigate(Route.FOLDER_OPEN_SCREEN + "/$folderName")
                         })
                     }
+
                     composable(Route.IMAGE_OPEN_SCREEN + "/{$ID_CONST}" + "/{$FOLDER_NAME}",
                         arguments = listOf(
                             navArgument(ID_CONST) {
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
                             defaultValue=1L
                         }
                     )){
-                        VideoOpenScreen(viewModel = viewModel)
+                        VideoOpenScreen(viewModel = viewModel, navController = navController)
                     }
                     composable(
                         route = Route.FOLDER_OPEN_SCREEN + "/{$NAME_CONST}",
