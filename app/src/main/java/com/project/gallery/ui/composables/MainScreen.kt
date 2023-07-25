@@ -44,8 +44,6 @@ import com.project.gallery.ui.composables.bottom_nav.BottomBarScreens
 import com.project.gallery.ui.composables.bottom_nav.ImageScreen
 import com.project.gallery.ui.composables.bottom_nav.VideoScreenMain
 import com.project.gallery.utils.AppIcon
-import com.project.gallery.utils.Constants
-import com.project.gallery.utils.PermissionManager.isPermission
 import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
 import java.math.BigInteger
@@ -70,14 +68,10 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        val permission by remember {
-            mutableStateOf(isPermission(context, Constants.PERMISSIONS))
-        }
+
         val isDarkTheme by viewModel.isDarkThemeEnabled.observeAsState()
 
-        if (permission) {
-            viewModel.scanImages()
-        }
+
         val scrollBehavior =
             TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state = rememberTopAppBarState())
 
@@ -156,12 +150,14 @@ fun MainScreen(
                             label = { Text(text = stringResource(screen.tittle)) },
                             selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                             onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                scope.launch {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             })
                     }

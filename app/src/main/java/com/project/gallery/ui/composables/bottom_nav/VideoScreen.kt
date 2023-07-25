@@ -44,6 +44,7 @@ fun VideoScreenMain(
     val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
+
     LaunchedEffect(key1 = list) {
         viewModel.tempVideoFolder = list
     }
@@ -88,6 +89,7 @@ fun VideoScreenMain(
                                     onItemClick.invoke(it.bucketName!!, it.fileId)
                                 }, fileModel = it, contentScale = ContentScale.Crop
                         )
+
                     }
                 }
 

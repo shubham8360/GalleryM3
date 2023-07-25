@@ -7,9 +7,11 @@ import com.project.gallery.models.Folder
 import com.project.gallery.utils.StorageUtils.getAllFiles
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 class Repository @Inject constructor(
@@ -19,19 +21,60 @@ class Repository @Inject constructor(
 
     override fun insertFiles(list: List<FileModel>) = dao.insertFiles(list)
 
-    override fun getFiles(isVideo: Boolean): Flow<List<FileModel>> = dao.getFiles(isVideo)
-    override fun getFolder(isVideo: Boolean): Flow<List<Folder>> = dao.getFolder(isVideo)
+    fun getFolder(isVideo: Boolean = false): Flow<List<Folder>> {
+        return getFiles(isVideo)
+            .map { fileModel ->
+                fileModel.groupBy { it.bucketName }.map { list ->
+                    val items = list.value.sortedByDescending { it.modifiedDate }
+                    Folder(list.key ?: "", items)
+                }
+            }.flowOn(Dispatchers.IO)
 
-    suspend fun scanImages() {
+
+    }
+
+    override suspend fun deleteFile(list: List<FileModel>) = dao.deleteFile(list)
+
+    override fun getFiles(isVideo: Boolean): Flow<List<FileModel>> {
+        return dao.getFiles(isVideo)
+            .map { fileModels ->
+                val filePaths = fileModels.map { it.path }
+                val existingFilePaths = filePaths.filter { File(it).exists() }
+
+                val nonExistentFileModels = fileModels.filterNot { it.path in existingFilePaths }
+
+                if (nonExistentFileModels.isNotEmpty()) {
+                    deleteFile(nonExistentFileModels)
+                }
+
+                fileModels.filter { it.path in existingFilePaths }
+            }.flowOn(Dispatchers.IO)
+    }
+
+
+    suspend fun scanImages(list: List<FileModel>) {
         withContext(Dispatchers.IO) {
-            delay(5000)
             val imageMap = context.getAllFiles(StorageUtils.Keys.IMAGES)
             val files = imageMap.entries.flatMap { it.value }
-            insertFiles(files)
-            val videoMap = context.getAllFiles(StorageUtils.Keys.VIDEO)
-            val files2 = videoMap.entries.flatMap { it.value }
-            insertFiles(files2)
+
+            val itemsAdded = files.filterNot { it in list }
+            val removedItems = list.filterNot { it in files }
+
+
+            if (itemsAdded.isNotEmpty()) {
+                dao.insertFiles(itemsAdded)
+            }
+
+            if (removedItems.isNotEmpty()) {
+                dao.deleteFile(removedItems)
+            }
         }
+    }
+
+    suspend fun scanVideos(list: List<FileModel>) {
+        val videoMap = context.getAllFiles(StorageUtils.Keys.VIDEO)
+        val files2 = videoMap.entries.flatMap { it.value }
+        insertFiles(files2)
     }
 
 

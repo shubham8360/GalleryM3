@@ -6,6 +6,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.project.gallery.models.FileModel
 import com.project.gallery.models.Folder
 import com.project.gallery.utils.Constants.PERMISSIONS
 import com.project.gallery.utils.Constants.SHARED_PREFERENCES
@@ -32,12 +33,14 @@ class MainViewModel @Inject constructor(
     }
 
     var folderList: Flow<List<Folder>> = repo.getFolder()
-    var tempFolderList= listOf<Folder>()
+    var tempFolderList = listOf<Folder>()
+
     val allImagesList = repo.getFiles()
+    val tempAllImageList = listOf<FileModel>()
 
 
     var allVideos = repo.getFolder(true)
-    var tempVideoFolder= listOf<Folder>()
+    var tempVideoFolder = listOf<Folder>()
 
     var isDarkThemeEnabled =
         savedStateHandle.getLiveData(THEME_VALUE, sharedPreferences.getBoolean(THEME_VALUE, false))
@@ -48,9 +51,6 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        if (isPermission(app, PERMISSIONS)) {
-            scanImages()
-        }
         if (isPermission(app, PERMISSIONS)) {
             scanVideos()
         }
@@ -64,10 +64,9 @@ class MainViewModel @Inject constructor(
         }*/
     }
 
-    fun scanImages() {
+    fun scanImages(list: List<FileModel>) {
         viewModelScope.launch(IO) {
-            repo.scanImages()
-
+            repo.scanImages(list)
         }
         /*  val hashMap = app.getAllFiles(StorageUtils.Keys.IMAGES)
           folderList.postValue(hashMap.entries.toList().map { Folder(name = it.key, content = it.value) })
@@ -75,5 +74,12 @@ class MainViewModel @Inject constructor(
               .sortedByDescending { it.modifiedDate?:0 })
       }*/
     }
+
+    fun deleteFiles(list: List<FileModel>) {
+        viewModelScope.launch {
+            repo.deleteFile(list = list)
+        }
+    }
+
 
 }

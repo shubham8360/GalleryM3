@@ -73,7 +73,7 @@ fun ImageOpenedScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
             if (it.resultCode == RESULT_OK) {
                 Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show()
-                viewModel.scanImages()
+                viewModel.scanImages(viewModel.tempAllImageList)
             }
         }
     val list2 = viewModel.tempFolderList
@@ -167,18 +167,20 @@ fun ImageOpenedScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ImageItem(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(16.dp))
-                        .graphicsLayer {
-                            scaleX = imageSize
-                            scaleY = imageSize
-                        },
-                    fileModel = specificDir[page],
-                    contentScale = ContentScale.Fit
-                )
+
+                    ImageItem(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .clip(RoundedCornerShape(16.dp))
+                            .graphicsLayer {
+                                scaleX = imageSize
+                                scaleY = imageSize
+                            },
+                        fileModel = specificDir[page],
+                        contentScale = ContentScale.Fit
+                    )
+
             }
             Log.d(TAG, "ImageOpenedScreen:$page ${pagerState.currentPage}")
         }

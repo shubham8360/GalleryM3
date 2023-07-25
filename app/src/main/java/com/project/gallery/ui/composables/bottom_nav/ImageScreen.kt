@@ -22,12 +22,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.project.gallery.ui.composables.image.ImageItem
+import com.project.gallery.utils.Constants
+import com.project.gallery.utils.PermissionManager
 import com.project.gallery.vm.MainViewModel
+import java.io.File
 import java.math.BigInteger
 
 
@@ -38,14 +44,24 @@ fun ImageScreen(
     onImageClick: (bucketName: String, image: BigInteger) -> Unit,
     onMoreClick: (name: String) -> Unit
 ) {
+    val context = LocalContext.current
     val imagesList by viewModel.allImagesList.collectAsState(emptyList())
 
     val folderList by viewModel.folderList.collectAsState(emptyList())
 
+    val permission by remember {
+        mutableStateOf(PermissionManager.isPermission(context, Constants.PERMISSIONS))
+    }
+
     LaunchedEffect(folderList) {
         viewModel.tempFolderList = folderList
     }
-
+    LaunchedEffect(imagesList) {
+        viewModel.tempFolderList = folderList
+    }
+    LaunchedEffect(key1 = permission) {
+        viewModel.scanImages(imagesList)
+    }
 
     LazyColumn(modifier = modifier) {
         item {
@@ -77,15 +93,21 @@ fun ImageScreen(
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     items(imagesList) { image ->
-                        ImageItem(
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(100.dp)
-                                .clickable {
-                                    onImageClick(image.bucketName!!, image.fileId)
-                                }, fileModel = image,
-                            contentScale = ContentScale.Crop
-                        )
+                        if (File(image.path).exists()) {
+                            ImageItem(
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                                    .clickable {
+                                        onImageClick(image.bucketName!!, image.fileId)
+                                    }, fileModel = image,
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            LaunchedEffect(key1 = Unit) {
+                                viewModel.deleteFiles(listOf(image))
+                            }
+                        }
                     }
                 }
             }
@@ -119,15 +141,16 @@ fun ImageScreen(
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     items(it.content) { image ->
-                        ImageItem(
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(100.dp)
-                                .clickable {
-                                    onImageClick(image.bucketName!!, image.fileId)
-                                }, fileModel = image,
-                            contentScale = ContentScale.Crop
-                        )
+                        if (File(image.path).exists())
+                            ImageItem(
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                                    .clickable {
+                                        onImageClick(image.bucketName!!, image.fileId)
+                                    }, fileModel = image,
+                                contentScale = ContentScale.Crop
+                            )
                     }
                 }
             }

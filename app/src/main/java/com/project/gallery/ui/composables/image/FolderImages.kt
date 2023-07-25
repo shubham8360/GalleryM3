@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -36,26 +37,30 @@ import java.math.BigInteger
 fun FolderImages(
     viewModel: MainViewModel,
     folderName: String,
-    onImageClick: (bucketName:String,id: BigInteger) -> Unit,
-    onBackClick:()->Unit
+    onImageClick: (bucketName: String, id: BigInteger) -> Unit,
+    onBackClick: () -> Unit
 ) {
 
-    val foldersList by  viewModel.folderList.collectAsState(emptyList())
+    val foldersList by viewModel.folderList.collectAsState(emptyList())
 
-    val folderContent=foldersList.filter { it.name ==folderName}.flatMap {
+    val folderContent = foldersList.filter { it.name == folderName }.flatMap {
         it.content
     }
+    var scope = rememberCoroutineScope()
 
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(text = folderName)
         }, navigationIcon = {
             IconButton(onClick = { onBackClick() }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back_button_cd) )
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(id = R.string.back_button_cd)
+                )
             }
         })
     }) {
-        Column (modifier = Modifier.padding(it)){
+        Column(modifier = Modifier.padding(it)) {
             LazyVerticalStaggeredGrid(
                 modifier = Modifier
                     .fillMaxSize()
@@ -75,6 +80,8 @@ fun FolderImages(
                             }, fileModel = image,
                         contentScale = ContentScale.Crop
                     )
+
+
                 }
             }
         }

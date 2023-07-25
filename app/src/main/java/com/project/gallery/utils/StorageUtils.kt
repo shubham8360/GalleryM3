@@ -94,7 +94,8 @@ object StorageUtils {
                         var name =
                             cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
                         val modifiedDate =
-                            cursor.getLongOrNull(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED))?:0
+                            cursor.getLongOrNull(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED))
+                                ?: 0
                         val size =
                             cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE))
                         var duration: Int? = null
@@ -146,7 +147,7 @@ object StorageUtils {
                                 bucketPath = bucketPath,
                                 bucketName = bucketName,
                                 uri = uri,
-                                isVideo = pUri===Keys.VIDEO
+                                isVideo = pUri === Keys.VIDEO
                             )
                         )
                     }

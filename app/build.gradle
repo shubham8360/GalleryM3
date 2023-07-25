@@ -97,6 +97,8 @@ dependencies {
     kapt "androidx.room:room-compiler:2.5.2"
     implementation "androidx.room:room-ktx:2.5.2"
 
+    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
 
 
 

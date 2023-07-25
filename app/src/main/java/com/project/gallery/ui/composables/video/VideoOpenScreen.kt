@@ -54,9 +54,10 @@ import com.project.gallery.vm.MainViewModel
 import kotlinx.coroutines.launch
 
 private const val TAG = "VideoOpenScreen"
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun  VideoOpenScreen(navController: NavController,viewModel: MainViewModel) {
+fun VideoOpenScreen(navController: NavController, viewModel: MainViewModel) {
     val args = navController.currentBackStackEntry?.arguments
     val imageId = args?.getLong(Constants.ID_CONST)
     val bucketName = args?.getString(Constants.FOLDER_NAME)
@@ -68,7 +69,7 @@ fun  VideoOpenScreen(navController: NavController,viewModel: MainViewModel) {
         rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show()
-                viewModel.scanImages()
+                viewModel.scanImages(viewModel.tempAllImageList)
             }
         }
 
@@ -162,18 +163,20 @@ fun  VideoOpenScreen(navController: NavController,viewModel: MainViewModel) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ImageItem(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(16.dp))
-                        .graphicsLayer {
-                            scaleX = imageSize
-                            scaleY = imageSize
-                        },
-                    fileModel = specificDir[page],
-                    contentScale = ContentScale.Fit
-                )
+
+                    ImageItem(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .clip(RoundedCornerShape(16.dp))
+                            .graphicsLayer {
+                                scaleX = imageSize
+                                scaleY = imageSize
+                            },
+                        fileModel = specificDir[page],
+                        contentScale = ContentScale.Fit
+                    )
+
             }
             Log.d(TAG, "ImageOpenedScreen:$page ${pagerState.currentPage}")
         }
